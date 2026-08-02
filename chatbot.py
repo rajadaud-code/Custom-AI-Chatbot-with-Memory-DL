@@ -1,7 +1,7 @@
 """
 Stateful Chatbot Module - Custom AI Chatbot with Memory
 =========================================================
-Author: Senior AI Architect (Techling Private Limited)
+Author: Senior AI Architect (Decode Lab)
 
 This module implements the core Stateful Chatbot engine with official Frontier LLM SDK integration
 (Google GenAI / OpenAI) and fallback Mock LLM Provider capability.
@@ -79,7 +79,7 @@ class StatefulChatbot:
         self,
         provider: str = "auto",
         max_memory_messages: int = 10,
-        system_instruction: str = "You are an intelligent, helpful AI assistant built by Techling Private Limited."
+        system_instruction: str = "You are an intelligent, helpful AI assistant built by Decode Lab."
     ):
         """
         Initialize Stateful Chatbot instance.
@@ -92,6 +92,7 @@ class StatefulChatbot:
         self.system_instruction = system_instruction
         self.memory = SlidingWindowMemory(max_messages=max_memory_messages, system_instruction=system_instruction)
         self.provider_type = self._resolve_provider(provider)
+        self._gemini_sdk_version = "genai"  # 'genai' or 'generativeai'
         self.client = self._init_client()
 
     def _resolve_provider(self, requested_provider: str) -> str:
@@ -105,22 +106,40 @@ class StatefulChatbot:
         elif req == "mock":
             return "mock"
         
-        # Auto resolution
-        if os.getenv("GEMINI_API_KEY"):
+        # Auto resolution based on valid non-empty API keys
+        gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+        openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+
+        if gemini_key and not gemini_key.startswith("your_"):
             return "gemini"
-        elif os.getenv("OPENAI_API_KEY"):
+        elif openai_key and not openai_key.startswith("your_"):
             return "openai"
         else:
-            logger.info("No LLM API keys found in environment. Falling back to robust Mock LLM Provider.")
+            logger.info("No active LLM API keys found in environment. Falling back to Mock LLM Provider.")
             return "mock"
 
     def _init_client(self) -> Any:
         """Initialize appropriate Frontier LLM SDK client or Mock Provider."""
         if self.provider_type == "gemini":
+            api_key = os.getenv("GEMINI_API_KEY")
+            # 1. Try official google-genai SDK
             try:
                 from google import genai
-                api_key = os.getenv("GEMINI_API_KEY")
+                self._gemini_sdk_version = "genai"
+                logger.info("Initializing Google GenAI SDK (google.genai.Client)")
                 return genai.Client(api_key=api_key)
+            except ImportError:
+                # 2. Try legacy google-generativeai SDK
+                try:
+                    import google.generativeai as genai_legacy
+                    self._gemini_sdk_version = "generativeai"
+                    genai_legacy.configure(api_key=api_key)
+                    logger.info("Initializing Google Generative AI SDK (google.generativeai)")
+                    return genai_legacy
+                except Exception as e:
+                    logger.warning(f"Failed to initialize Google GenAI SDK: {e}. Falling back to Mock Provider.")
+                    self.provider_type = "mock"
+                    return MockLLMProvider()
             except Exception as e:
                 logger.warning(f"Failed to initialize Google GenAI SDK: {e}. Falling back to Mock Provider.")
                 self.provider_type = "mock"
@@ -130,6 +149,7 @@ class StatefulChatbot:
             try:
                 from openai import OpenAI
                 api_key = os.getenv("OPENAI_API_KEY")
+                logger.info("Initializing OpenAI SDK (openai.OpenAI)")
                 return OpenAI(api_key=api_key)
             except Exception as e:
                 logger.warning(f"Failed to initialize OpenAI SDK: {e}. Falling back to Mock Provider.")
@@ -175,18 +195,35 @@ class StatefulChatbot:
         try:
             if self.provider_type == "gemini":
                 model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-                # Format contents for Google GenAI SDK
-                formatted_contents = []
-                for msg in history:
-                    role = "user" if msg["role"] == "user" else "model"
-                    formatted_contents.append({"role": role, "parts": [{"text": msg["content"]}]})
                 
-                response = self.client.models.generate_content(
-                    model=model_name,
-                    contents=formatted_contents,
-                    config={"system_instruction": self.system_instruction} if self.system_instruction else None
-                )
-                return response.text.strip()
+                if self._gemini_sdk_version == "genai":
+                    # Google GenAI SDK (google.genai)
+                    formatted_contents = []
+                    for msg in history:
+                        role = "user" if msg["role"] == "user" else "model"
+                        formatted_contents.append({"role": role, "parts": [{"text": msg["content"]}]})
+                    
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=formatted_contents,
+                        config={"system_instruction": self.system_instruction} if self.system_instruction else None
+                    )
+                    return response.text.strip()
+
+                else:
+                    # Legacy Google Generative AI SDK (google.generativeai)
+                    import google.generativeai as genai_legacy
+                    gen_model = genai_legacy.GenerativeModel(
+                        model_name=model_name,
+                        system_instruction=self.system_instruction
+                    )
+                    formatted_contents = []
+                    for msg in history:
+                        role = "user" if msg["role"] == "user" else "model"
+                        formatted_contents.append({"role": role, "parts": [msg["content"]]})
+                    
+                    response = gen_model.generate_content(formatted_contents)
+                    return response.text.strip()
 
             elif self.provider_type == "openai":
                 model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")

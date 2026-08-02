@@ -1,7 +1,7 @@
 """
 Enterprise Database Persistence Module - Custom AI Chatbot with Memory
 ======================================================================
-Author: Senior AI Architect (Techling Private Limited)
+Author: Senior AI Architect (Decode Lab)
 
 BONUS / ENTERPRISE ARCHITECTURE
 -------------------------------
@@ -213,8 +213,8 @@ def demonstrate_enterprise_persistence(session_id: Optional[str] = None, memory_
         memory_snapshot = [
             {"role": "user", "content": "My name is Vipin"},
             {"role": "model", "content": "Hello Vipin! Nice to meet you."},
-            {"role": "user", "content": "I work at Techling Private Limited."},
-            {"role": "model", "content": "Understood! Techling is an awesome tech company."}
+            {"role": "user", "content": "I work at Decode Lab."},
+            {"role": "model", "content": "Understood! Decode Lab is an awesome tech company."}
         ]
 
     db_store = PostgresMemoryStore()

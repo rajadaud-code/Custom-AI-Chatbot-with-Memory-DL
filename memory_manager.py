@@ -1,7 +1,7 @@
 """
 Memory Manager Module - Custom AI Chatbot with Memory
 ======================================================
-Author: Senior AI Architect (Techling Private Limited)
+Author: Senior AI Architect (Decode Lab)
 
 This module implements two core architectural components:
 1. Structural Validation Gate: Intercepts user inputs before sending to the LLM

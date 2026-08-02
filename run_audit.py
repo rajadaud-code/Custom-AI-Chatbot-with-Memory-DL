@@ -1,7 +1,7 @@
 """
 System Audit Runner - Custom AI Chatbot with Memory
 ====================================================
-Author: Senior AI Architect (Techling Private Limited)
+Author: Senior AI Architect (Decode Lab)
 
 SYSTEM AUDIT FUNCTIONALITY & MEMORY EXAM
 -----------------------------------------
@@ -169,7 +169,7 @@ def main():
     """Run all System Audits."""
     print("\n" + "#" * 75)
     print("      PROJECT 1: CUSTOM AI CHATBOT WITH MEMORY - SYSTEM AUDIT SUITE")
-    print("      Techling Private Limited | Senior AI Architecture Verification")
+    print("      Decode Lab | Senior AI Architecture Verification")
     print("#" * 75)
 
     v_gate = audit_validation_gate()

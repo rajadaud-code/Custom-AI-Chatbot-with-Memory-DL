@@ -1,7 +1,7 @@
 """
 Main Interactive CLI Application - Custom AI Chatbot with Memory
 =================================================================
-Author: Senior AI Architect (Techling Private Limited)
+Author: Senior AI Architect (Decode Lab)
 
 Provides an interactive CLI interface to chat with the Stateful AI Chatbot,
 inspect sliding window memory state, trigger live system audits, and test DB persistence.
@@ -49,7 +49,7 @@ def run_cli():
     """Run interactive terminal session with Stateful Chatbot."""
     print("\n" + "=" * 70)
     print("      PROJECT 1: CUSTOM AI CHATBOT WITH MEMORY (CLI INTERFACE)")
-    print("      Developed for Techling Private Limited")
+    print("      Developed for Decode Lab")
     print("=" * 70)
 
     # Initialize Chatbot

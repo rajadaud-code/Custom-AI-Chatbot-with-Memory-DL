@@ -1,7 +1,7 @@
 # Project 1: Custom AI Chatbot with Memory
 
 **Senior AI Architect Blueprint & Core Implementation**  
-*Techling Private Limited | Production-Grade Stateful LLM Memory Architecture*
+*Decode Lab | Production-Grade Stateful LLM Memory Architecture*
 
 ---
 
@@ -219,5 +219,5 @@ CREATE INDEX IF NOT EXISTS idx_chat_memory_jsonb ON chat_memory_snapshots USING 
 
 ## License & Attribution
 
-Developed by **Senior AI Architect** for **Techling Private Limited**.  
+Developed by **Senior AI Architect** for **Decode Lab**.  
 Built for high-concurrency, scalable LLM state management.
