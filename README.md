@@ -169,9 +169,28 @@ python run_audit.py
 
 ---
 
-### Step 3: Running the Interactive Chatbot CLI
+### Step 3: Running the Interactive Web UI
 
-Start the interactive session:
+Launch the Flask Web Server backend to test the chatbot with a modern, responsive Web UI:
+
+```bash
+python app.py
+```
+
+Then open your browser and navigate to:
+**`http://127.0.0.1:5000`**
+
+#### Web UI Features:
+- **Real-Time Memory Dashboard**: Monitors active message capacity (e.g. `2 / 10 Messages`), FIFO dropped message pairs, active turns, and provider status.
+- **Structural Validation Alert**: Displays instant warning banner when whitespace or empty inputs are intercepted.
+- **Interactive System Audit Modal**: Click **"Run System Audit ('Memory Exam')"** to execute diagnostic tests directly from the browser.
+- **PostgreSQL Persistence Button**: Trigger JSONB persistence snapshot with a single click.
+
+---
+
+### Step 4: Running the Interactive Chatbot CLI
+
+Start the terminal CLI session:
 
 ```bash
 python main.py

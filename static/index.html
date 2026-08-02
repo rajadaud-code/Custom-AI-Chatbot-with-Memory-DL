@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom AI Chatbot with Memory | Decode Lab</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- LEFT SIDEBAR: MEMORY & ARCHITECTURE DASHBOARD -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <div class="brand-logo">
+          <i class="fa-solid fa-brain-circuit"></i>
+        </div>
+        <div class="brand-text">
+          <h2>Decode Lab</h2>
+          <span>Custom AI Chatbot</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">ACTIVE PROVIDER</div>
+        <div class="provider-card" id="providerCard">
+          <div class="pulse-dot"></div>
+          <span id="providerName">GEMINI</span>
+          <span class="badge-tag">Frontier LLM</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">SESSION METRICS</div>
+        <div class="session-uuid-box">
+          <i class="fa-solid fa-fingerprint"></i>
+          <span id="sessionIdText">Loading Session...</span>
+        </div>
+      </div>
+
+      <!-- SLIDING WINDOW MEMORY DASHBOARD CARD -->
+      <div class="sidebar-section">
+        <div class="section-title">SLIDING WINDOW MEMORY (FIFO)</div>
+        <div class="memory-card">
+          <div class="metric-row">
+            <span>Memory Capacity:</span>
+            <strong id="memoryCountText">0 / 10 Messages</strong>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="memoryProgressBar" style="width: 0%;"></div>
+          </div>
+          <div class="metric-grid">
+            <div class="mini-stat">
+              <span class="stat-value" id="droppedCount">0</span>
+              <span class="stat-label">Dropped Pairs</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-value" id="turnCount">0</span>
+              <span class="stat-label">Active Turns</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARCHITECTURAL AUDIT & PERSISTENCE ACTIONS -->
+      <div class="sidebar-section">
+        <div class="section-title">SYSTEM AUDIT & ACTIONS</div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" id="btnRunAudit">
+            <i class="fa-solid fa-vial-circle-check"></i> Run System Audit ("Memory Exam")
+          </button>
+          <button class="btn btn-secondary" id="btnPersistDb">
+            <i class="fa-solid fa-database"></i> Persist to PostgreSQL (JSONB)
+          </button>
+          <button class="btn btn-danger" id="btnClearMemory">
+            <i class="fa-solid fa-trash-can"></i> Clear Memory History
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>Architected by <strong>Decode Lab</strong></p>
+        <span class="ver-tag">v1.0.0 Stateful Engine</span>
+      </div>
+    </aside>
+
+    <!-- MAIN CHAT INTERFACE AREA -->
+    <main class="chat-main">
+      <!-- HEADER -->
+      <header class="chat-header">
+        <div class="header-info">
+          <h1>Stateful AI Chatbot with Memory</h1>
+          <p>Rolling context window management with Structural Validation Gate & System Audit</p>
+        </div>
+        <div class="header-badges">
+          <span class="status-chip"><i class="fa-solid fa-shield-halved"></i> Validation Gate Active</span>
+          <span class="status-chip fifo"><i class="fa-solid fa-sliders"></i> FIFO Truncation Capped</span>
+        </div>
+      </header>
+
+      <!-- VALIDATION GATE ALERT BANNER (INLINE NOTIFICATION) -->
+      <div class="alert-banner" id="alertBanner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="alertMessage">Validation Gate Intercepted empty string.</span>
+        <button class="close-alert" id="btnCloseAlert">&times;</button>
+      </div>
+
+      <!-- MESSAGES DISPLAY CONTAINER -->
+      <div class="chat-messages" id="chatMessages">
+        <div class="welcome-card">
+          <div class="welcome-icon"><i class="fa-solid fa-comments"></i></div>
+          <h3>Welcome to Project 1: Custom AI Chatbot with Memory</h3>
+          <p>This stateful AI chatbot maintains your conversation context in real time. Try injecting facts (e.g. <code>My name is Vipin</code>), testing distractions, or inspecting memory array states!</p>
+          <div class="quick-prompts">
+            <button class="chip-prompt" data-text="My name is Vipin">Inject Fact: "My name is Vipin"</button>
+            <button class="chip-prompt" data-text="Write a long poem about artificial intelligence">Distraction: "Write a long poem"</button>
+            <button class="chip-prompt" data-text="What is my name?">State Extraction: "What is my name?"</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TYPING INDICATOR -->
+      <div class="typing-indicator" id="typingIndicator">
+        <div class="typing-bubble">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <span class="typing-label">AI model is generating response...</span>
+      </div>
+
+      <!-- INPUT BAR -->
+      <footer class="chat-footer">
+        <div class="input-container">
+          <textarea id="userInput" placeholder="Type your message here... (Empty inputs will be blocked by Structural Validation Gate)" rows="1"></textarea>
+          <button class="send-btn" id="btnSend" disabled>
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+        <div class="input-subtext">
+          <span class="guard-hint"><i class="fa-solid fa-lock"></i> Guard: Whitespace-only payloads are blocked before API call</span>
+          <span class="char-count" id="charCount">0 chars</span>
+        </div>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- SYSTEM AUDIT RESULT MODAL -->
+  <div class="modal-overlay" id="auditModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-clipboard-check"></i> System Audit & Memory Exam</h3>
+        <button class="close-modal" id="btnCloseModal">&times;</button>
+      </div>
+      <div class="modal-body" id="auditModalBody">
+        <div class="audit-loading">
+          <div class="spinner"></div>
+          <p>Running automated diagnostic suite...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCloseModalBtn">Close Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
